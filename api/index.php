@@ -4,12 +4,16 @@
  * Routes incoming HTTP requests to their respective PHP scripts while preserving execution context.
  */
 
+// Prevent aggressive CDN and browser caching of dynamic PHP responses
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Pragma: no-cache");
+
 $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
 $path = parse_url($requestUri, PHP_URL_PATH);
 $path = ltrim($path, '/');
 
 // Base directory is the project root
-$rootDir = realpath(__DIR__ . '/..');
+$rootDir = realpath(__DIR__ . '/..') ?: dirname(__DIR__);
 
 // Default route (homepage)
 if ($path === '' || $path === 'index.php') {
@@ -22,9 +26,12 @@ if ($path === '' || $path === 'index.php') {
 
 // Target file resolution
 $targetFile = realpath($rootDir . '/' . $path);
+if (!$targetFile) {
+    $targetFile = $rootDir . '/' . $path;
+}
 
-// Security check: ensure target is within root directory and is a PHP file
-if ($targetFile && strpos($targetFile, $rootDir) === 0 && is_file($targetFile) && pathinfo($targetFile, PATHINFO_EXTENSION) === 'php') {
+// Security check: ensure target is a valid PHP file
+if (file_exists($targetFile) && is_file($targetFile) && pathinfo($targetFile, PATHINFO_EXTENSION) === 'php') {
     chdir(dirname($targetFile));
     $_SERVER['SCRIPT_NAME'] = '/' . $path;
     $_SERVER['SCRIPT_FILENAME'] = $targetFile;

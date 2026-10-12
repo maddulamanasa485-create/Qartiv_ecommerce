@@ -1,0 +1,15 @@
+# Private secrets & credentials
+config/db.local.php
+.env
+.env.*
+
+# Large binaries & archives
+cloudflared.exe
+*.zip
+*.tar
+*.gz
+
+# Logs & temp files
+*.log
+screenshot_test.png
+.system_generated/

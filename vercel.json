@@ -1,0 +1,37 @@
+{
+  "version": 2,
+  "functions": {
+    "api/**/*.php": {
+      "runtime": "vercel-php@0.7.3"
+    },
+    "index.php": {
+      "runtime": "vercel-php@0.7.3"
+    },
+    "customer/**/*.php": {
+      "runtime": "vercel-php@0.7.3"
+    },
+    "admin/**/*.php": {
+      "runtime": "vercel-php@0.7.3"
+    },
+    "auth/**/*.php": {
+      "runtime": "vercel-php@0.7.3"
+    },
+    "test_db_audit.php": {
+      "runtime": "vercel-php@0.7.3"
+    }
+  },
+  "routes": [
+    {
+      "src": "/assets/(.*)",
+      "dest": "/assets/$1"
+    },
+    {
+      "src": "/uploads/(.*)",
+      "dest": "/uploads/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ]
+}

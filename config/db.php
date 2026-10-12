@@ -1,25 +1,35 @@
 <?php
 /**
  * QARTIV - Database Connection Configuration
- * Supports Localhost (WAMP/XAMPP) & Live Cloud Hosting (InfinityFree, cPanel, etc.)
+ * Secure multi-environment database loader.
+ * Compatible with Localhost (WAMP/XAMPP), Vercel (Cloud DB), and Live Hosting (InfinityFree, cPanel).
  */
 
-// Local Database Settings (Default for WAMP)
+// Default Local Database Settings (WAMP / Localhost)
 $host = "localhost";
 $user = "root";
 $password = "";
 $database = "qartiv";
+$port = 3306;
 
-// Live Cloud Hosting / Environment Overrides
-// When deploying to InfinityFree or other live hosts, you can set your credentials here:
+// 1. Cloud & Container Environment Variables (Vercel, Render, Railway, Docker)
 if (getenv('DB_HOST')) {
     $host = getenv('DB_HOST');
-    $user = getenv('DB_USER');
-    $password = getenv('DB_PASS');
-    $database = getenv('DB_NAME');
+    $user = getenv('DB_USER') ?: 'root';
+    $password = getenv('DB_PASS') ?: '';
+    $database = getenv('DB_NAME') ?: 'qartiv';
+    if (getenv('DB_PORT')) {
+        $port = (int)getenv('DB_PORT');
+    }
 }
 
-$conn = @new mysqli($host, $user, $password, $database);
+// 2. Private Local Credentials (Untracked in Git for hosting without env vars)
+$privateConfigFile = __DIR__ . '/db.local.php';
+if (file_exists($privateConfigFile)) {
+    include $privateConfigFile;
+}
+
+$conn = @new mysqli($host, $user, $password, $database, $port);
 
 if ($conn->connect_error) {
     die("<div style='font-family:Segoe UI,sans-serif;padding:30px;max-width:620px;margin:50px auto;border:1px solid #fecaca;background:#fef2f2;border-radius:12px;color:#991b1b;box-shadow:0 10px 25px rgba(0,0,0,0.05);'>
@@ -27,8 +37,8 @@ if ($conn->connect_error) {
         <p style='font-size:15px;line-height:1.5;'>Could not connect to the database: <code>" . htmlspecialchars($conn->connect_error) . "</code></p>
         <hr style='border:none;border-top:1px solid #fee2e2;margin:18px 0;'>
         <p style='color:#374151;font-size:13.5px;line-height:1.6;'>
-            <strong>• On Localhost (WAMP):</strong> Make sure the WAMP MySQL service is running (green icon) and the database <code>qartiv</code> is imported.<br>
-            <strong>• On Live Server (InfinityFree):</strong> Open <code>config/db.php</code> and fill in your MySQL Hostname, Username, Password, and Database from your hosting panel.
+            <strong>• On Localhost (WAMP):</strong> Ensure the WAMP MySQL service is running (green icon) and database <code>qartiv</code> is imported.<br>
+            <strong>• On Live Server:</strong> Configure environment variables (<code>DB_HOST</code>, <code>DB_USER</code>, <code>DB_PASS</code>, <code>DB_NAME</code>) or add credentials to <code>config/db.local.php</code>.
         </p>
     </div>");
 }
